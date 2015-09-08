@@ -1,11 +1,7 @@
 #include "mcp4725.h"
 #include <cmath>
 
-#include <iostream>
-#include <iomanip>
-
 namespace dac {
-
 
 enum class commands : uint8_t
 {
@@ -30,33 +26,15 @@ void mcp4725::set(double val, bool writeToEEPROM)
     // convert val into
     auto d = voltageToRegister( val );
 
-    std::cout << "setting register to\ndec: "
-              << d << ", hex: "<< std::hex << d
-              << " (" << ( ( d >> 4 ) & 0xFF )
-              << ", " << ( ( d << 4 ) & 0xFF )
-              << ")"
-              << std::dec << std::endl;
-
-    if( writeToEEPROM )
+    mDevice->write(
     {
-        mDevice->write(
-        {
-            static_cast< uint8_t >( commands::write_dac ),
-            static_cast< uint8_t >( ( d >> 4 ) & 0xFF ),
-            static_cast< uint8_t >( ( d << 4 ) & 0xFF )
-        }
-        );
+        writeToEEPROM ?
+            static_cast< uint8_t >( commands::write_dac_and_eeprom ) :
+            static_cast< uint8_t >( commands::write_dac),
+        static_cast< uint8_t >( ( d >> 4 ) & 0xFF ),
+        static_cast< uint8_t >( ( d << 4 ) & 0xFF )
     }
-    else
-    {
-        mDevice->write(
-        {
-            static_cast< uint8_t >( commands::write_dac_and_eeprom ),
-            static_cast< uint8_t >( ( d >> 4 ) & 0xFF ),
-            static_cast< uint8_t >( ( d << 4 ) & 0xFF )
-        }
-        );
-    }
+    );
 }
 
 double mcp4725::get() const
