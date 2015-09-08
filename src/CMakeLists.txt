@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 SET(CMAKE_SYSTEM_NAME Linux)
 SET(CMAKE_C_COMPILER arm-linux-gnueabihf-gcc)
 SET(CMAKE_CXX_COMPILER arm-linux-gnueabihf-g++)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 SET(CMAKE_FIND_ROOT_PATH $ENV{HOME}/arjan/rpi/rootfs)
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
