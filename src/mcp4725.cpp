@@ -19,7 +19,7 @@ mcp4725::mcp4725(
         i2c::address_t address,
         double vdd
         )
-    : mDevice{ i2c::smbus::create( devname, address ) },
+    : mDevice{ i2c::create( devname, address ) },
       mVDD{ vdd }
 {
 }
@@ -30,27 +30,32 @@ void mcp4725::set(double val, bool writeToEEPROM)
     // convert val into
     auto d = voltageToRegister( val );
 
-    std::cout << "setting register to " << std::hex << d << std::dec << std::endl;
+    std::cout << "setting register to\ndec: "
+              << d << ", hex: "<< std::hex << d
+              << " (" << ( ( d >> 4 ) & 0xFF )
+              << ", " << ( ( d << 4 ) & 0xFF )
+              << ")"
+              << std::dec << std::endl;
 
     if( writeToEEPROM )
     {
         mDevice->write(
-                static_cast< i2c::smbus::command_t >( commands::write_dac_and_eeprom ),
-                {
-                    static_cast< uint8_t >( ( d >> 4 ) & 0xff ),
-                    static_cast< uint8_t >( ( d << 4 ) & 0xFF )
-                }
-                );
+        {
+            static_cast< uint8_t >( commands::write_dac ),
+            static_cast< uint8_t >( ( d >> 4 ) & 0xFF ),
+            static_cast< uint8_t >( ( d << 4 ) & 0xFF )
+        }
+        );
     }
     else
     {
         mDevice->write(
-                static_cast< i2c::smbus::command_t >( commands::write_dac ),
-                {
-                    static_cast< uint8_t >( ( d >> 4 ) & 0xff ),
-                    static_cast< uint8_t >( ( d << 4 ) & 0xFF )
-                }
-                );
+        {
+            static_cast< uint8_t >( commands::write_dac_and_eeprom ),
+            static_cast< uint8_t >( ( d >> 4 ) & 0xFF ),
+            static_cast< uint8_t >( ( d << 4 ) & 0xFF )
+        }
+        );
     }
 }
 

@@ -18,7 +18,7 @@ namespace smbus {
 namespace linux {
 
 device::device(const string& dev, address_t address )
-    : mDevice{ open( dev.c_str(), O_RDWR ) },
+    : mDevice{ open( dev.c_str(), O_RDWR, 0 ) },
       mAddress( address )
 {
     if( mDevice == -1 )

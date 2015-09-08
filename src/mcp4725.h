@@ -1,7 +1,7 @@
 #ifndef MCP4725
 #define MCP4725
 
-#include "smbus_device.h"
+#include "i2c_device.h"
 
 namespace dac {
 
@@ -21,7 +21,7 @@ private:
     int voltageToRegister( double voltage );
 
 private:
-    i2c::smbus::device_t mDevice;
+    i2c::device_t mDevice;
     const double mVDD = 5.0;          // Volt
 };
 
