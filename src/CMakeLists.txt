@@ -15,6 +15,9 @@ project( iCaldo )
 file(GLOB_RECURSE iCaldo_SOURCES "*.cpp")
 file(GLOB_RECURSE iCaldo_HEADERS "*.h")
 
+set( CMAKE_BUILD_TYPE MinSizeRel FORCE )
+       
+
 #set (iCaldo_INCLUDE_DIRS "")
 #foreach (_headerFile ${iCaldo_HEADERS})
 #    get_filename_component(_dir ${_headerFile} PATH)
