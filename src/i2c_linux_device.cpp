@@ -46,14 +46,15 @@ void device::write( const buffer_t& data )
 }
 
 
-void device::write( std::initializer_list< uint8_t > data )
+void device::write( initializer_list< uint8_t > data )
 {
     setAddress();
 
-    if( ::write(mDevice, begin( data ), data.size()) < 0 )
+    auto res = ::write(mDevice, begin( data ), data.size() );
+    if( res < 0 )
     {
         ostringstream os;
-        os << "unable to write: " << strerror( errno );
+        os << "unable to write (" << res << "): "  << strerror( errno );
         throw runtime_error{ move( os.str() ) };
     }
 }
