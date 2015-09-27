@@ -53,7 +53,7 @@ private:
     int percentToRegister( long double percent );
 
 private:
-    i2c::device_t mDevice;
+    i2c::Ii2cPtr mDevice;
     double mVDD = 5.0;          // Volt
 };
 

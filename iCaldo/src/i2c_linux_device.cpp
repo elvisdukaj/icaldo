@@ -16,7 +16,7 @@ using namespace std;
 namespace i2c {
 namespace linux {
 
-device::device(const string& dev, address_t address )
+i2c::i2c(const string& dev, address_t address )
     : mDevice{ open( dev.c_str(), O_RDWR, 0 ) },
       mAddress( address )
 {
@@ -28,13 +28,13 @@ device::device(const string& dev, address_t address )
     }
 }
 
-device::~device()
+i2c::~i2c()
 {
     close( mDevice );
 }
 
 
-void device::write( const buffer_t& data )
+void i2c::write( const buffer_t& data )
 {
     setAddress();
     if( ::write(mDevice, data.data(), data.size()) < 0 )
@@ -46,7 +46,7 @@ void device::write( const buffer_t& data )
 }
 
 
-void device::write( initializer_list< uint8_t > data )
+void i2c::write( initializer_list< uint8_t > data )
 {
     setAddress();
 
@@ -59,7 +59,7 @@ void device::write( initializer_list< uint8_t > data )
     }
 }
 
-buffer_t device::read( size_t len ) const
+buffer_t i2c::read( size_t len ) const
 {
     setAddress();
     buffer_t data( len );
@@ -76,7 +76,7 @@ buffer_t device::read( size_t len ) const
     return data;
 }
 
-void device::setAddress() const
+void i2c::setAddress() const
 {
     // set the address
     if( ioctl( mDevice, I2C_SLAVE, mAddress ) < 0 )

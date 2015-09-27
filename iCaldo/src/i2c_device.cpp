@@ -2,11 +2,11 @@
 
 namespace i2c {
 
-Idevice::~Idevice() {}
+Ii2c::~Ii2c() {}
 
-device_t create( const std::string& devname, address_t address )
+Ii2cPtr create( const std::string& devname, address_t address )
 {
-    return device_t{ new linux::device{ devname, address } };
+    return Ii2cPtr{ new linux::i2c{ devname, address } };
 }
 
 } // i2c

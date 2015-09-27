@@ -1,15 +1,14 @@
 #ifndef WIRE_1_LINUX_H
 #define WIRE_1_LINUX_H
 
-#include "wire_1.h"
+#include "thermometer.h"
 
-namespace wire_1 {
 namespace linux {
 
-class device : public Idevice {
+class Thermomether : public IThermometer {
 public:
-    device( const std::string& serial );
-    ~device() {};
+    Thermomether( const std::string& serial );
+    ~Thermomether() {};
 
     Celsius read() const override;
 
@@ -18,7 +17,5 @@ private:
 };
 
 } // linux
-} // wire_1
-
 #endif // WIRE_1_LINUX_H
 

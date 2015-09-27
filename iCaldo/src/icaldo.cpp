@@ -1,8 +1,10 @@
 #include "mcp4725.h"
-#include "wire_1.h"
+#include "thermometer.h"
 
-#include "boost/thread.hpp"
+#include <boost/thread.hpp>
+#include <boost/regex.hpp>
 
+#include <chrono>
 #include <iostream>
 #include <iomanip>
 #include <csignal>
@@ -28,6 +30,10 @@ int main()
 {
 
     signal(SIGINT, intHandler);
+
+    boost::thread thr{};
+
+    boost::regex regex{""};
 
     if( true )
     {
@@ -71,7 +77,7 @@ int main()
     Celsius average{ 0.0L };
     while( keepRunning )
     {
-        auto temp = wire_1::create( "28-02150186b8ff" );
+        auto temp = CreateThermomether( "28-02150186b8ff" );
         average += temp->read();
         ++count;
 

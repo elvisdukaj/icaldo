@@ -1,11 +1,10 @@
-#include "wire_1_linux.h"
+#include "thermometer_linux.h"
 
 #include <fstream>
 #include <sstream>
 #include <vector>
 using namespace std;
 
-namespace wire_1 {
 namespace linux {
 
 inline string CreatePath( const string& serial )
@@ -15,12 +14,12 @@ inline string CreatePath( const string& serial )
     return std::move( os.str() );
 }
 
-device::device( const std::string &serial )
+Thermomether::Thermomether( const std::string &serial )
     : mDevice{ CreatePath( serial ) }
 {
 }
 
-Celsius device::read() const
+Celsius Thermomether::read() const
 {
     auto&& device = ifstream( mDevice );
 
@@ -49,5 +48,3 @@ Celsius device::read() const
 }
 
 } // linux
-} // wire_1
-

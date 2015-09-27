@@ -6,11 +6,11 @@
 namespace i2c {
 namespace linux {
 
-class device : public Idevice
+class i2c : public Ii2c
 {
 public:
-    device( const std::string& dev, address_t address );
-    ~device() override;
+    i2c( const std::string& dev, address_t address );
+    ~i2c() override;
 
     void write( const buffer_t& data ) override;
     void write( std::initializer_list< uint8_t > data) override;

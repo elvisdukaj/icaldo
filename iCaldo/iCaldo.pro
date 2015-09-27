@@ -3,8 +3,14 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
-INCLUDEPATH += include /usr/local/include
+INCLUDEPATH += ./include
+INCLUDEPATH += /usr/local/include
+
 QMAKE_CXXFLAGS += -std=c++11
+
+HEADERS += ./include/*.h \
+    include/controller.h \
+    include/communication.h
 
 SOURCES += \
     src/i2c_device.cpp \
@@ -13,11 +19,12 @@ SOURCES += \
     src/mcp4725.cpp \
     src/smbus_device.cpp \
     src/smbus_linux_device.cpp \
-    src/wire_1_linux.cpp \
-    src/wire_1.cpp
+    src/controller.cpp \
+    src/thermometer.cpp \
+    src/thermometer_linux.cpp
 
-LIBS += -L/usr/local/lib
-LIBS += -lboost_thread
+LIBS += -L~/arjan/rpi/raspbian/usr/local/lib
+LIBS += -lboost_thread -lboost_system -lboost_regex
 
 include(deployment.pri)
 qtcAddDeployment()

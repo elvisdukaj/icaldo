@@ -11,10 +11,10 @@ namespace i2c {
 
 
 // interface for a generic i2c device
-class Idevice
+class Ii2c
 {
 public:
-    virtual ~Idevice() = 0;
+    virtual ~Ii2c() = 0;
 
     virtual void write( const buffer_t& data ) = 0;
     virtual void write( std::initializer_list< uint8_t > data) = 0;
@@ -22,8 +22,8 @@ public:
 };
 
 // factory function
-using device_t = std::unique_ptr< Idevice >;
-device_t create( const std::string& devname, address_t address );
+using Ii2cPtr = std::unique_ptr< Ii2c >;
+Ii2cPtr create( const std::string& devname, address_t address );
 
 } // i2c
 

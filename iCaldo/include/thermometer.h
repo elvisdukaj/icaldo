@@ -31,20 +31,18 @@ constexpr Celsius operator"" _celsius( long double val)
     return Celsius{ val };
 }
 
-namespace wire_1 {
 
-class Idevice {
+class IThermometer {
 public:
-    virtual ~Idevice() = 0;
+    virtual ~IThermometer() = 0;
 
     virtual Celsius read() const = 0;
 };
 
 // factory function
-using device_t = std::unique_ptr< Idevice >;
-device_t create( const std::string& serial );
+using IThermometerPtr = std::unique_ptr< IThermometer >;
+IThermometerPtr CreateThermomether( const std::string& serial );
 
-} // wire_1
 
 #endif // WIRE_1_H
 
