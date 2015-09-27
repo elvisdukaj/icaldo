@@ -3,8 +3,11 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
+linux-rasp-pi-g++{
+
+DEFINES += BOOST_ALL_DYN_LINK
+
 INCLUDEPATH += ./include
-INCLUDEPATH += /usr/local/include
 
 QMAKE_CXXFLAGS += -std=c++11
 
@@ -23,8 +26,9 @@ SOURCES += \
     src/thermometer.cpp \
     src/thermometer_linux.cpp
 
-LIBS += -L~/arjan/rpi/raspbian/usr/local/lib
-LIBS += -lboost_thread -lboost_system -lboost_regex
+LIBS += -L~/arjan/rpi/raspbian/usr/lib
+LIBS += -lboost_thread -lboost_system -lboost_regex -lboost_unit_test_framework -lboost_log -lpthread
 
 include(deployment.pri)
 qtcAddDeployment()
+}

@@ -1,5 +1,10 @@
 #include "mcp4725.h"
+#include <boost/log/trivial.hpp>
 #include <cmath>
+#include <iostream>
+#include <iomanip>
+
+using namespace std;
 
 namespace dac {
 
@@ -19,64 +24,108 @@ mcp4725::mcp4725(
     mVDD = 5.0;
 }
 
-
 void mcp4725::set(Volt val, bool writeToEEPROM)
 {
     // convert val into
-    auto d = voltageToRegister( val );
-
-    mDevice->write(
-    {
-        writeToEEPROM ?
-            static_cast< uint8_t >( commands::write_dac_and_eeprom ) :
-            static_cast< uint8_t >( commands::write_dac),
-        static_cast< uint8_t >( ( d >> 4 ) & 0xFF ),
-        static_cast< uint8_t >( ( d << 4 ) & 0xFF )
-    }
-    );
+    setRegister( writeToEEPROM, voltageToRegister( val ) );
 }
-
 
 void mcp4725::set( Percent val, bool writeToEEPROM )
 {
     // convert val into
-    auto d = percentToRegister( val );
+    setRegister( writeToEEPROM, percentToRegister( val ) );
+}
+
+mcp4725::State mcp4725::state() const
+{
+    auto res = mDevice->read(5);
+
+    BOOST_LOG_TRIVIAL( trace ) << "reading state: {"
+                               << (int)res[0] << ' '
+                               << (int)res[1] << ' '
+                               << (int)res[2] << ' '
+                               << (int)res[3] << ' '
+                               << (int)res[4] << "} ";
+
+    return res[ 0 ] >> 7 ? State::BUSY : State::READY;
+}
+
+Percent mcp4725::getPercent() const
+{
+    return registerToPercent( getRegister() );
+}
+
+Volt mcp4725::getVolt() const
+{
+    return registerToVolt( getRegister() );
+}
+
+void mcp4725::setRegister(bool writeToEEPROM, int val)
+{
+    auto cmd = writeToEEPROM ? commands::write_dac_and_eeprom : commands::write_dac;
+
+    BOOST_LOG_TRIVIAL( trace ) << "writing " << hex << setfill('0')
+                               << setw( 2 ) << (int) cmd << ", "
+                               << setw( 2 ) << val
+                               << dec << setfill(' ');
 
     mDevice->write(
     {
-        writeToEEPROM ?
-        static_cast< uint8_t >(commands::write_dac_and_eeprom) :
-        static_cast< uint8_t >(commands::write_dac),
-        static_cast< uint8_t >((d >> 4) & 0xFF),
-        static_cast< uint8_t >((d << 4) & 0xFF)
+        static_cast< uint8_t >( cmd ),
+        static_cast< uint8_t >( ( val >> 4 ) & 0xFF ),
+        static_cast< uint8_t >( ( val << 4 ) & 0xFF )
     }
     );
 }
 
-double mcp4725::get() const
+int mcp4725::getRegister() const
 {
-    return 0.0;
+    auto res = mDevice->read( 5 );
+    auto reg = res[2] << 4 | res[1];
+
+    BOOST_LOG_TRIVIAL( trace ) << "reading register "
+                               << hex << setfill('0')
+                               << setw( 2 ) << reg
+                               << dec << setfill(' ');
+    return reg;
 }
 
-int mcp4725::voltageToRegister( long double Vout )
+int mcp4725::voltageToRegister( long double Vout ) const
 {
-
     //       4096
     // K = ------
     //       Vdd
 
     // D = Vout * K
 
-    static const auto K = 4095.0 / mVDD;
+    static const auto K = mMaxValue / mVDD;
     return static_cast< int >( round( Vout * K ) );
 }
 
 
-int mcp4725::percentToRegister( long double perc )
+int mcp4725::percentToRegister( long double perc ) const
+{
+    // percent : 100 = x : mMaxValue
+    // x = percent * 4096 / 100
+    return round( perc * mMaxValue );
+}
+
+Percent mcp4725::registerToPercent( int reg ) const
 {
     // percent : 100 = x : 4096
-    // x = percent * 4096 / 100
-    return round( perc * 4095.0L );
+    // p = 100 * x / 4096
+    static const auto k = 100.0L / mMaxValue;
+    return  Percent{round( reg * k) / 100.0L };
+}
+
+Volt mcp4725::registerToVolt( int reg ) const
+{
+    //        Vdd x reg
+    // Vout = ---------
+    //         4096.0
+
+    long double K = mVDD / mMaxValue;
+    return Volt{ round( reg * K ) };
 }
 
 } // dac

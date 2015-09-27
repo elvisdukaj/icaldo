@@ -1,92 +1,84 @@
 #include "mcp4725.h"
-#include "thermometer.h"
 
-#include <boost/thread.hpp>
-#include <boost/regex.hpp>
+#define BOOST_TEST_MODULE DAC_TEST
+#include <boost/test/unit_test.hpp>
+#include <boost/log/trivial.hpp>
 
-#include <chrono>
-#include <iostream>
-#include <iomanip>
-#include <csignal>
-
-
-static volatile bool keepRunning = true;
+#include <thread>
 
 using namespace std;
 
-inline void WaitUser()
+BOOST_AUTO_TEST_CASE( dac63_0Volt )
 {
-    static string line;
-    // wait for 'Enter'
-    cout << "Press 'Enter' to continue" << endl;
-    getline( cin, line );
+    BOOST_LOG_TRIVIAL( trace ) << "DAC VOLTAGE TEST - 0 Volt";
+    dac::mcp4725 d{"/dev/i2c-1", 0x63};
+    auto const targetVal = 0.0_V;
+
+    d.set( targetVal );
+    auto settedVal = d.getVolt();
+    d.state();
+
+    BOOST_CHECK_EQUAL( targetVal, settedVal );
 }
 
-void intHandler(int) {
-    keepRunning = 0;
+
+BOOST_AUTO_TEST_CASE( dac63_2Volt )
+{
+    BOOST_LOG_TRIVIAL( trace ) << "DAC VOLTAGE TEST - 2 Volt";
+    dac::mcp4725 d{"/dev/i2c-1", 0x63};
+    auto const targetVal = 2.0_V;
+
+    d.set(targetVal);
+    auto settedVal = d.getVolt();
+    d.state();
+
+    BOOST_CHECK_EQUAL( targetVal, settedVal );
 }
 
-int main()
+BOOST_AUTO_TEST_CASE( dac63_5Volt )
 {
+    BOOST_LOG_TRIVIAL( trace ) << "DAC VOLTAGE TEST - 5 Volt";
+    dac::mcp4725 d{"/dev/i2c-1", 0x63};
+    auto const targetVal = 5.0_V;
 
-    signal(SIGINT, intHandler);
+    d.set( targetVal );
+    auto settedVal = d.getVolt();
+    d.state();
 
-    boost::thread thr{};
+    BOOST_CHECK_EQUAL( targetVal, settedVal );
+}
 
-    boost::regex regex{""};
 
-    if( true )
-    {
-        string device{"/dev/i2c-1"};
-        try
-        {
-            for( auto address : { 0x62, 0x63 } )
-            {
-                cout << "Opening dac at address " << hex << address << dec << endl;
-                dac::mcp4725 dev( device, address );
+BOOST_AUTO_TEST_CASE( dac63_100Perc )
+{
+    BOOST_LOG_TRIVIAL( trace ) << "DAC VOLTAGE TEST - 100%";
+    dac::mcp4725 d{"/dev/i2c-1", 0x63};
+    auto const targetVal = 1.0_percent;
 
-                cout << "STARTIN VOLTAGE TEST" << endl;
-                for( auto v : { 0.1_V, 0.5_V, 1.0_V, 3.0_V, 4.0_V, 4.5_V, 5.0_V } )
-                {
-                    dev.set( v );
-                    cout << "setting voltage to " << v << "V" << endl;
-//                    WaitUser();
-                }
-                cout << "TEST FINISHED" << endl;
+    d.state();
+    d.set(targetVal);
+    auto settedVal = d.getPercent();
+    d.state();
 
-                cout << "STARTIN PERCENTAGE TEST" << endl;
-                for( auto v : { 0.0_percent, 0.1_percent, 0.5_percent, 1.0_percent } )
-                {
-                    dev.set( v );
-                    cout << "setting voltage to " << v * 100.0 << "%" << endl;
-//                    WaitUser();
-                }
+    BOOST_CHECK_EQUAL( targetVal, settedVal );
+}
 
-                cout << endl;
-            }
-        }
-        catch( const std::exception& exc )
-        {
-            cerr << exc.what() << endl;
-        }
-    }
 
-    if( false )
-    {
-    unsigned long long count = 0;
-    Celsius average{ 0.0L };
-    while( keepRunning )
-    {
-        auto temp = CreateThermomether( "28-02150186b8ff" );
-        average += temp->read();
-        ++count;
+BOOST_AUTO_TEST_CASE( dac63_100PercToEEPROM )
+{
+    BOOST_LOG_TRIVIAL( trace ) << "DAC VOLTAGE TEST TO EEPROM - 100%";
+    dac::mcp4725 d{"/dev/i2c-1", 0x63};
+    auto const targetVal = 1.0_percent;
 
-        cout << "t is " << temp->read() << endl;
-    }
+    d.state();
+    d.set(targetVal, true);
+    auto settedVal = d.getPercent();
 
-    cout << "t average " << (average / (long double) count ) << endl;
-    }
+    BOOST_REQUIRE_EQUAL( d.state(), dac::mcp4725::BUSY );
+    BOOST_LOG_TRIVIAL( trace ) << "Waiting 3s";
+    this_thread::sleep_for( chrono::seconds{ 3 } );
+    BOOST_REQUIRE_EQUAL( d.state(), dac::mcp4725::READY );
 
-    return EXIT_SUCCESS;
+    BOOST_CHECK_EQUAL( targetVal, settedVal );
 }
 
